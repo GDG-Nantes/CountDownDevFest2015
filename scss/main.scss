@@ -1,0 +1,42 @@
+@import "colors";
+
+@font-face {
+    font-family: 'Pixelmix';
+    src: url('../fonts/pixelmix.ttf');
+}
+
+@font-face {
+    font-family: 'PixelmixBold';
+    src: url('../fonts/pixelmix_bold.ttf');
+}
+
+
+html, body{
+	position: absolute;
+	width: calc(100% - 120px);
+	height: calc(100% - 20px);
+	top: 0;
+	left: 0;
+	margin: 0;
+	background: $bg-color;
+	font-family: 'Pixelmix';
+	text-transform: uppercase;
+	color: white;
+	padding: 10px 60px;
+}
+
+
+header, footer{
+	border-bottom: 5px solid white;
+}
+
+footer{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	margin: 10px 60px;
+	width: calc(100% - 120px);
+	border-top: 5px solid white;
+}
+
+hr{}
