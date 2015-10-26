@@ -22,18 +22,58 @@ html, body{
 	font-family: 'Pixelmix';
 	text-transform: uppercase;
 	color: white;
-	padding: 10px 60px;
+	padding: 10px 60px;	
 }
 
+$hHeader :80px;
+$hFooter : 80px;
+
+header {
+	height : $hHeader;
+}
+
+footer {
+	height : $hFooter;
+
+}
 
 header, footer{
-	border-bottom: 5px solid white;
+	border-bottom: 5px solid white;	
+	position:relative;
+	font-size:25px;
+
+	.left{
+		position:absolute;
+		left:0;		
+	}
+
+	.right{
+		position:absolute;
+		right:0;		
+	}
+
+	.top{
+		position:absolute;
+		top:10px;		
+	}
+
+	.bottom{
+		position:absolute;
+		bottom:10px;		
+	}
+
+	.big{		
+		font-size:55px;
+		height: $hFooter;
+		line-height:$hFooter;
+	}
 }
 
 footer{
 	position: absolute;
 	bottom: 0;
 	left: 0;
+	padding:5px;
 	margin: 10px 60px;
 	width: calc(100% - 120px);
 	border-top: 5px solid white;

@@ -7,9 +7,8 @@ var DevFestCountDown = DevFestCountDown || function(){
 		SIZE_LOGO_DEST = 100, 
 		TIME_ANIMATION = 1000,
 		TIME_ANIMATION_SPACESHIP = 500,
-		TIME_SHOOT = 500,
-		MARGIN = 20,
-		NB_ROW = -1;
+		TIME_SHOOT = 200,
+		MARGIN = 20;
 
 	var canvas = null,
 		context = null,
@@ -19,6 +18,8 @@ var DevFestCountDown = DevFestCountDown || function(){
         indexPlaylist = 0,
         directionLogos = -1,
         directionSpaceShip = -1,
+        stars = [],
+        collision = null,
         positionShoot =  {
         	x : -1,
         	y : -1
@@ -53,38 +54,38 @@ var DevFestCountDown = DevFestCountDown || function(){
         },
         positionSpaceShip = {
         	x : 0,
-        	y : NB_ROW
+        	y : -1
         },
         mapLogos = [
         	[
-        		{id:'photos',pos:{x:2,y:0}},
-        		{id:'gplus',pos:{x:3,y:0}},
-        		{id:'music',pos:{x:4,y:0}},
-        		{id:'maps',pos:{x:5,y:0}},
-        		{id:'calendar',pos:{x:6,y:0}},
-        		{id:'keep',pos:{x:7,y:0}},
-        		{id:'glass',pos:{x:8,y:0}},
-        		{id:'android',pos:{x:9,y:0}},
+        		{id:'photos',pos:{x:2,y:0},index:{row:0,col:0}},
+        		{id:'gplus',pos:{x:3,y:0}, index: {row:0,col:1}},
+        		{id:'music',pos:{x:4,y:0}, index: {row:0,col:2}},
+        		{id:'maps',pos:{x:5,y:0}, index: {row:0,col:3}},
+        		{id:'calendar',pos:{x:6,y:0}, index: {row:0,col:4}},
+        		{id:'keep',pos:{x:7,y:0}, index: {row:0,col:5}},
+        		{id:'glass',pos:{x:8,y:0}, index: {row:0,col:6}},
+        		{id:'android',pos:{x:9,y:0}, index: {row:0,col:7}},
         	],
         	[
-        		{id:'compute',pos:{x:2,y:1}},
-        		{id:'play',pos:{x:3,y:1}},
-        		{id:'docs',pos:{x:4,y:1}},
-        		{id:'sheets',pos:{x:5,y:1}},
-        		{id:'draw',pos:{x:6,y:1}},
-        		{id:'youtube',pos:{x:7,y:1}},
-        		{id:'contacts',pos:{x:8,y:1}},
-        		{id:'chrome',pos:{x:9,y:1}},
+        		{id:'compute',pos:{x:2,y:1}, index: {row:1,col:0}},
+        		{id:'play',pos:{x:3,y:1}, index: {row:1,col:1}},
+        		{id:'docs',pos:{x:4,y:1}, index: {row:1,col:2}},
+        		{id:'sheets',pos:{x:5,y:1}, index: {row:1,col:3}},
+        		{id:'draw',pos:{x:6,y:1}, index: {row:1,col:4}},
+        		{id:'youtube',pos:{x:7,y:1}, index: {row:1,col:5}},
+        		{id:'contacts',pos:{x:8,y:1}, index: {row:1,col:6}},
+        		{id:'chrome',pos:{x:9,y:1}, index: {row:1,col:7}},
         	],
         	[
-        		{id:'gmail',pos:{x:2,y:2}},
-        		{id:'playstore',pos:{x:3,y:2}},
-        		{id:'movies',pos:{x:4,y:2}},
-        		{id:'hangout',pos:{x:5,y:2}},
-        		{id:'drive',pos:{x:6,y:2}},
-        		{id:'news',pos:{x:7,y:2}},
-        		{id:'wallet',pos:{x:8,y:2}},
-        		{id:'devs',pos:{x:9,y:2}},
+        		{id:'gmail',pos:{x:2,y:2}, index: {row:2,col:0}},
+        		{id:'playstore',pos:{x:3,y:2}, index: {row:2,col:1}},
+        		{id:'movies',pos:{x:4,y:2}, index: {row:2,col:2}},
+        		{id:'hangout',pos:{x:5,y:2}, index: {row:2,col:3}},
+        		{id:'drive',pos:{x:6,y:2}, index: {row:2,col:4}},
+        		{id:'news',pos:{x:7,y:2}, index: {row:2,col:5}},
+        		{id:'wallet',pos:{x:8,y:2}, index: {row:2,col:6}},
+        		{id:'devs',pos:{x:9,y:2}, index: {row:2,col:7}},
         	]
         ];
 
@@ -94,7 +95,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 			var image = new Image();
 			image.src = sprite.url;
 			image.onload = function() {
-				images[sprite.title] = image;
+				images[sprite.title] = image;				
 				resolve(sprite);
 			}.bind(this);
 			image.onerror = function() {
@@ -129,6 +130,49 @@ var DevFestCountDown = DevFestCountDown || function(){
             console.error(err);
         }
     }
+
+    function removeStars() {
+	    for(var l = stars.length-1, i = l; i >= 0; i--) {
+	        if(stars[i].life < 0) {
+	            stars[i] = stars[stars.length-1];
+	            stars.length--;
+	        }
+	    }
+	    if (stars.length <= 0){
+	    	collision = null;
+	    }
+	}
+
+	function makeStars(coordX, coordY) {    
+	    var starAmt = Math.random()*20 + 50;	    
+	    for(var i = 0; i < starAmt; i++) {	        
+	        var dir = Math.random()*2*Math.PI;
+	        var speed = Math.random()*3 + 2;
+	        var life = Math.random()*10 + 10;	        
+	        stars[stars.length] = new Star(coordX, coordY, speed, dir, life);	        
+	    }
+	}
+
+	function Star(x, y, speed, dir, life) {
+	    var _this = this;
+	    
+	    this.x = x;
+	    this.y = y;
+	    
+	    var xInc = Math.cos(dir) * speed;
+	    var yInc = Math.sin(dir) * speed;
+	    
+	    this.life = life;
+
+	    this.update = function() {
+	        this.x += xInc;
+	        this.y += yInc;
+	        this.life--;
+	    }
+	}
+
+
+
 
     function processMoveLogos(){
     	if (directionLogos < 0 ){
@@ -187,8 +231,35 @@ var DevFestCountDown = DevFestCountDown || function(){
     }
 
     function processMoveShoot(){
-    	positionShoot.y--;
-    	if (processMoveShoot > 0){
+    	positionShoot.y-= (SIZE_LOGO_DEST + MARGIN);
+    	let flatArray = [];
+    	mapLogos.forEach(function(cols){
+    		Array.prototype.push.apply(flatArray, cols);
+    	});
+    	collision = flatArray.find(function(cel){
+    		let celY = cel.pos.y * (SIZE_LOGO_DEST + MARGIN);
+            let celX = cel.pos.x * (SIZE_LOGO_DEST + MARGIN);
+    		return celY <= positionShoot.y 
+    			&& celY + SIZE_LOGO_DEST > positionShoot.y
+    			&& cel.pos.x <= positionShoot.x
+    			&& cel.pos.x +1 > positionShoot.x;
+    	});
+    	if (collision){
+    		positionShoot.x = -1;
+    		positionShoot.y = -1;
+    		makeStars(
+    			collision.pos.x * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2), 
+    			collision.pos.y * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2)
+    			);
+    		mapLogos[collision.index.row].splice(collision.index.col, 1);
+
+    		// TODO
+    		setTimeout(function(){
+				positionShoot.x =  positionSpaceShip.x;
+				positionShoot.y = positionSpaceShip.y+1;
+				processMoveShoot();
+			},2000)
+    	}else if (positionShoot.y > 0){
     		setTimeout(processMoveShoot, TIME_SHOOT);
     	}
     }
@@ -217,7 +288,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 			, imgSpaceShip.width // swidth clipping de l'image originale
 			, imgSpaceShip.height // sheight clipping de l'image originale
 			, positionSpaceShip.x * (SIZE_LOGO_DEST + MARGIN) // x Coordonnées dans le dessin du Model.ui.canvas
-			, NB_ROW  * (SIZE_LOGO_DEST + MARGIN)// y Coordonnées dans le dessin du Model.ui.canvas
+			, positionSpaceShip.y// y Coordonnées dans le dessin du Model.ui.canvas
 			, SIZE_LOGO_DEST // width taille du dessin
 			, SIZE_LOGO_DEST * (imgSpaceShip.height / imgSpaceShip.width) // height taille du dessin
 			);
@@ -226,18 +297,27 @@ var DevFestCountDown = DevFestCountDown || function(){
     		context.fillStyle = "white";
     		context.fillRect(
     			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
-    			(positionShoot.y - 1) * (SIZE_LOGO_DEST + MARGIN), //Y d'origine
+    			positionShoot.y, //Y d'origine
     			5, // width
     			20 // height
     		);
 
     		context.fillRect(
     			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
-    			(positionShoot.y - 1) * (SIZE_LOGO_DEST + MARGIN) - 25, //Y d'origine
+    			positionShoot.y - 25, //Y d'origine
     			5, // width
     			20 // height
     		);
     	}
+
+    	// Stars
+    	removeStars();
+        for(var i = 0; i < stars.length; i++) {
+        	var s = stars[i];
+	        context.fillRect(s.x-1, s.y-1, 2, 2);
+	        s.update();
+	    }
+
 
     	window.requestAnimationFrame(runAnimation);
     }
@@ -252,7 +332,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 		canvas.height = footerRect.top - headerRect.bottom;
 		canvas.width = (SIZE_LOGO_DEST + MARGIN) * 12;
 
-		NB_ROW = Math.floor(canvas.height / (SIZE_LOGO_DEST + MARGIN));
+		positionSpaceShip.y = canvas.height - SIZE_LOGO_DEST;
 
 		audioElt = document.getElementById('playlist');
 		loadSprites([
@@ -264,11 +344,12 @@ var DevFestCountDown = DevFestCountDown || function(){
 			processMoveLogos();
 			processMoveSpaceShip();
 
+			// TODO
 			setTimeout(function(){
 				positionShoot.x =  positionSpaceShip.x;
 				positionShoot.y = positionSpaceShip.y;
 				processMoveShoot();
-			},2000)
+			},2000);
 		});
 	}
 
