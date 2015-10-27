@@ -8,7 +8,9 @@ var DevFestCountDown = DevFestCountDown || function(){
 		TIME_ANIMATION = 1000,
 		TIME_ANIMATION_SPACESHIP = 500,
 		TIME_SHOOT = 200,
-		MARGIN = 20;
+		MARGIN = 20,
+        SHOOT_HEIGHT = 20,
+        SHOOT_SPACE = 25;
 
 	var canvas = null,
 		context = null,
@@ -58,34 +60,34 @@ var DevFestCountDown = DevFestCountDown || function(){
         },
         mapLogos = [
         	[
-        		{id:'photos',pos:{x:2,y:0},index:{row:0,col:0}},
-        		{id:'gplus',pos:{x:3,y:0}, index: {row:0,col:1}},
-        		{id:'music',pos:{x:4,y:0}, index: {row:0,col:2}},
-        		{id:'maps',pos:{x:5,y:0}, index: {row:0,col:3}},
-        		{id:'calendar',pos:{x:6,y:0}, index: {row:0,col:4}},
-        		{id:'keep',pos:{x:7,y:0}, index: {row:0,col:5}},
-        		{id:'glass',pos:{x:8,y:0}, index: {row:0,col:6}},
-        		{id:'android',pos:{x:9,y:0}, index: {row:0,col:7}},
+        		{id:'photos',pos:{x:2,y:0},index:{row:0,col:0}, visible:true},
+        		{id:'gplus',pos:{x:3,y:0}, index: {row:0,col:1}, visible:true},
+        		{id:'music',pos:{x:4,y:0}, index: {row:0,col:2}, visible:true},
+        		{id:'maps',pos:{x:5,y:0}, index: {row:0,col:3}, visible:true},
+        		{id:'calendar',pos:{x:6,y:0}, index: {row:0,col:4}, visible:true},
+        		{id:'keep',pos:{x:7,y:0}, index: {row:0,col:5}, visible:true},
+        		{id:'glass',pos:{x:8,y:0}, index: {row:0,col:6}, visible:true},
+        		{id:'android',pos:{x:9,y:0}, index: {row:0,col:7}, visible:true},
         	],
         	[
-        		{id:'compute',pos:{x:2,y:1}, index: {row:1,col:0}},
-        		{id:'play',pos:{x:3,y:1}, index: {row:1,col:1}},
-        		{id:'docs',pos:{x:4,y:1}, index: {row:1,col:2}},
-        		{id:'sheets',pos:{x:5,y:1}, index: {row:1,col:3}},
-        		{id:'draw',pos:{x:6,y:1}, index: {row:1,col:4}},
-        		{id:'youtube',pos:{x:7,y:1}, index: {row:1,col:5}},
-        		{id:'contacts',pos:{x:8,y:1}, index: {row:1,col:6}},
-        		{id:'chrome',pos:{x:9,y:1}, index: {row:1,col:7}},
+        		{id:'compute',pos:{x:2,y:1}, index: {row:1,col:0}, visible:true},
+        		{id:'play',pos:{x:3,y:1}, index: {row:1,col:1}, visible:true},
+        		{id:'docs',pos:{x:4,y:1}, index: {row:1,col:2}, visible:true},
+        		{id:'sheets',pos:{x:5,y:1}, index: {row:1,col:3}, visible:true},
+        		{id:'draw',pos:{x:6,y:1}, index: {row:1,col:4}, visible:true},
+        		{id:'youtube',pos:{x:7,y:1}, index: {row:1,col:5}, visible:true},
+        		{id:'contacts',pos:{x:8,y:1}, index: {row:1,col:6}, visible:true},
+        		{id:'chrome',pos:{x:9,y:1}, index: {row:1,col:7}, visible:true},
         	],
         	[
-        		{id:'gmail',pos:{x:2,y:2}, index: {row:2,col:0}},
-        		{id:'playstore',pos:{x:3,y:2}, index: {row:2,col:1}},
-        		{id:'movies',pos:{x:4,y:2}, index: {row:2,col:2}},
-        		{id:'hangout',pos:{x:5,y:2}, index: {row:2,col:3}},
-        		{id:'drive',pos:{x:6,y:2}, index: {row:2,col:4}},
-        		{id:'news',pos:{x:7,y:2}, index: {row:2,col:5}},
-        		{id:'wallet',pos:{x:8,y:2}, index: {row:2,col:6}},
-        		{id:'devs',pos:{x:9,y:2}, index: {row:2,col:7}},
+        		{id:'gmail',pos:{x:2,y:2}, index: {row:2,col:0}, visible:true},
+        		{id:'playstore',pos:{x:3,y:2}, index: {row:2,col:1}, visible:true},
+        		{id:'movies',pos:{x:4,y:2}, index: {row:2,col:2}, visible:true},
+        		{id:'hangout',pos:{x:5,y:2}, index: {row:2,col:3}, visible:true},
+        		{id:'drive',pos:{x:6,y:2}, index: {row:2,col:4}, visible:true},
+        		{id:'news',pos:{x:7,y:2}, index: {row:2,col:5}, visible:true},
+        		{id:'wallet',pos:{x:8,y:2}, index: {row:2,col:6}, visible:true},
+        		{id:'devs',pos:{x:9,y:2}, index: {row:2,col:7}, visible:true},
         	]
         ];
 
@@ -172,7 +174,44 @@ var DevFestCountDown = DevFestCountDown || function(){
 	}
 
 
+    function checkCollision(){
+        if (positionShoot.y < 0){
+            return;
+        }
+        let flatArray = [];
+        mapLogos.forEach(function(cols){
+            Array.prototype.push.apply(flatArray, cols);
+        });
+        let shootYEnd = positionShoot.y + SHOOT_HEIGHT + SHOOT_SPACE;
+        collision = flatArray.find(function(cel){
+            let celY = cel.pos.y * (SIZE_LOGO_DEST + MARGIN);
+            let celX = cel.pos.x * (SIZE_LOGO_DEST + MARGIN);
+            return cel.visible && ((celY <= positionShoot.y
+                && celY + SIZE_LOGO_DEST > positionShoot.y
+                && cel.pos.x <= positionShoot.x
+                && cel.pos.x +1 > positionShoot.x)
+            || (positionShoot.y <= celY
+                && (shootYEnd < celY + SIZE_LOGO_DEST || shootYEnd > celY + SIZE_LOGO_DEST)
+                && cel.pos.x <= positionShoot.x
+                && cel.pos.x +1 > positionShoot.x));
+        });
+        if (collision){
+            positionShoot.x = -1;
+            positionShoot.y = -1;
+            makeStars(
+                collision.pos.x * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2), 
+                collision.pos.y * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2)
+                );
+            mapLogos[collision.index.row][collision.index.col].visible = false;;
 
+            // TODO
+            setTimeout(function(){
+                positionShoot.x =  positionSpaceShip.x;
+                positionShoot.y = positionSpaceShip.y+1;
+                processMoveShoot();
+            },2000)
+        }
+    }
 
     function processMoveLogos(){
     	if (directionLogos < 0 ){
@@ -208,6 +247,7 @@ var DevFestCountDown = DevFestCountDown || function(){
     			});
     		}
     	}
+        checkCollision();
     	setTimeout(processMoveLogos, TIME_ANIMATION);
     }
 
@@ -229,37 +269,12 @@ var DevFestCountDown = DevFestCountDown || function(){
     	}
     	setTimeout(processMoveSpaceShip, TIME_ANIMATION_SPACESHIP);
     }
+    
 
     function processMoveShoot(){
     	positionShoot.y-= (SIZE_LOGO_DEST + MARGIN);
-    	let flatArray = [];
-    	mapLogos.forEach(function(cols){
-    		Array.prototype.push.apply(flatArray, cols);
-    	});
-    	collision = flatArray.find(function(cel){
-    		let celY = cel.pos.y * (SIZE_LOGO_DEST + MARGIN);
-            let celX = cel.pos.x * (SIZE_LOGO_DEST + MARGIN);
-    		return celY <= positionShoot.y 
-    			&& celY + SIZE_LOGO_DEST > positionShoot.y
-    			&& cel.pos.x <= positionShoot.x
-    			&& cel.pos.x +1 > positionShoot.x;
-    	});
-    	if (collision){
-    		positionShoot.x = -1;
-    		positionShoot.y = -1;
-    		makeStars(
-    			collision.pos.x * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2), 
-    			collision.pos.y * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2)
-    			);
-    		mapLogos[collision.index.row].splice(collision.index.col, 1);
-
-    		// TODO
-    		setTimeout(function(){
-				positionShoot.x =  positionSpaceShip.x;
-				positionShoot.y = positionSpaceShip.y+1;
-				processMoveShoot();
-			},2000)
-    	}else if (positionShoot.y > 0){
+    	checkCollision();
+    	if (positionShoot.y >= 0){
     		setTimeout(processMoveShoot, TIME_SHOOT);
     	}
     }
@@ -268,16 +283,18 @@ var DevFestCountDown = DevFestCountDown || function(){
     	context.clearRect(0, 0, canvas.width, canvas.height);
     	mapLogos.forEach(function(cols){
     		cols.forEach(function(cel){
-    			context.drawImage(images['logos']
-					, positionLogos[cel.id].x //sx clipping de l'image originale
-					, positionLogos[cel.id].y //sy clipping de l'image originale
-					, SIZE_LOGO_ORI // swidth clipping de l'image originale
-					, SIZE_LOGO_ORI // sheight clipping de l'image originale
-					, cel.pos.x * (SIZE_LOGO_DEST + MARGIN) // x Coordonnées dans le dessin du Model.ui.canvas
-					, cel.pos.y * (SIZE_LOGO_DEST + MARGIN)// y Coordonnées dans le dessin du Model.ui.canvas
-					, SIZE_LOGO_DEST // width taille du dessin
-					, SIZE_LOGO_DEST // height taille du dessin
-					);
+                if (cel.visible){                    
+                    context.drawImage(images['logos']
+                        , positionLogos[cel.id].x //sx clipping de l'image originale
+                        , positionLogos[cel.id].y //sy clipping de l'image originale
+                        , SIZE_LOGO_ORI // swidth clipping de l'image originale
+                        , SIZE_LOGO_ORI // sheight clipping de l'image originale
+                        , cel.pos.x * (SIZE_LOGO_DEST + MARGIN) // x Coordonnées dans le dessin du Model.ui.canvas
+                        , cel.pos.y * (SIZE_LOGO_DEST + MARGIN)// y Coordonnées dans le dessin du Model.ui.canvas
+                        , SIZE_LOGO_DEST // width taille du dessin
+                        , SIZE_LOGO_DEST // height taille du dessin
+                        );
+                }
     		});
     	}); 
 
@@ -293,20 +310,20 @@ var DevFestCountDown = DevFestCountDown || function(){
 			, SIZE_LOGO_DEST * (imgSpaceShip.height / imgSpaceShip.width) // height taille du dessin
 			);
 
-    	if (positionShoot.x >= 0){
+    	if (positionShoot.y >= 0){
     		context.fillStyle = "white";
     		context.fillRect(
     			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
     			positionShoot.y, //Y d'origine
     			5, // width
-    			20 // height
+    			SHOOT_HEIGHT // height
     		);
 
     		context.fillRect(
     			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
-    			positionShoot.y - 25, //Y d'origine
+    			positionShoot.y + SHOOT_SPACE, //Y d'origine
     			5, // width
-    			20 // height
+    			SHOOT_HEIGHT // height
     		);
     	}
 
