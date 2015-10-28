@@ -5,7 +5,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 	// Const
 	var SIZE_LOGO_ORI = 240,
 		SIZE_LOGO_DEST = 100, 
-		TIME_ANIMATION = 1000,
+		TIME_ANIMATION = 5000,
 		TIME_ANIMATION_SPACESHIP = 500,
 		TIME_SHOOT = 200,
 		MARGIN = 20,
