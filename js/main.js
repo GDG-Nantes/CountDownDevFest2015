@@ -7,10 +7,14 @@ var DevFestCountDown = DevFestCountDown || function(){
 		SIZE_LOGO_DEST = 100, 
 		TIME_ANIMATION = 5000,
 		TIME_ANIMATION_SPACESHIP = 500,
-		TIME_SHOOT = 200,
+		TIME_SHOOT = 200, 
+        TIME_DESTRUCTION = 0,
+        TIME_MOVE_SPACESHIP = 0,
 		MARGIN = 20,
         SHOOT_HEIGHT = 20,
-        SHOOT_SPACE = 25;
+        SHOOT_SPACE = 25,
+        TIME_COUNT_DOWN = 2 * 60 * 1000, 
+        NB_COLS = 12;
 
 	var canvas = null,
 		context = null,
@@ -21,6 +25,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         directionLogos = -1,
         directionSpaceShip = -1,
         stars = [],
+        freezeMooves = false,
         collision = null,
         positionShoot =  {
         	x : -1,
@@ -89,7 +94,8 @@ var DevFestCountDown = DevFestCountDown || function(){
         		{id:'wallet',pos:{x:8,y:2}, index: {row:2,col:6}, visible:true},
         		{id:'devs',pos:{x:9,y:2}, index: {row:2,col:7}, visible:true},
         	]
-        ];
+        ], 
+        destructionArray = [];
 
 	function loadSprite(sprite) {
 
@@ -196,77 +202,89 @@ var DevFestCountDown = DevFestCountDown || function(){
                 && cel.pos.x +1 > positionShoot.x));
         });
         if (collision){
+            freezeMooves = false;
             positionShoot.x = -1;
             positionShoot.y = -1;
+            processDestruction();
             makeStars(
                 collision.pos.x * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2), 
                 collision.pos.y * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2)
                 );
             mapLogos[collision.index.row][collision.index.col].visible = false;;
 
-            // TODO
-            setTimeout(function(){
-                positionShoot.x =  positionSpaceShip.x;
-                positionShoot.y = positionSpaceShip.y+1;
-                processMoveShoot();
-            },2000)
         }
     }
 
     function processMoveLogos(){
-    	if (directionLogos < 0 ){
-    		if (mapLogos[0][0].pos.x > 0){
-    			mapLogos.forEach(function(cols){
-    				cols.forEach(function(cel){
-    					cel.pos.x--;
-    				});
-    			});
-    		}else{
-    			directionLogos = 1;
-    			let rowNum = mapLogos[0][0].pos.y;
-    			mapLogos.forEach(function(cols){
-    				cols.forEach(function(cel){
-    					cel.pos.y+= rowNum === 0 ? 1 : -1;
-    				});
-    			});
-    		}
-    	}else{
-    		if (mapLogos[0][0].pos.x < 4){
-    			mapLogos.forEach(function(cols){
-    				cols.forEach(function(cel){
-    					cel.pos.x++;
-    				});
-    			});
-    		}else{
-    			directionLogos = -1;
-    			let rowNum = mapLogos[0][0].pos.y;
-    			mapLogos.forEach(function(cols){
-    				cols.forEach(function(cel){
-    					cel.pos.y+= rowNum === 0 ? 1 : -1;
-    				});
-    			});
-    		}
-    	}
+        if (!freezeMooves){            
+        	if (directionLogos < 0 ){
+        		if (mapLogos[0][0].pos.x > 0){
+        			mapLogos.forEach(function(cols){
+        				cols.forEach(function(cel){
+        					cel.pos.x--;
+        				});
+        			});
+        		}else{
+        			directionLogos = 1;
+        			let rowNum = mapLogos[0][0].pos.y;
+        			mapLogos.forEach(function(cols){
+        				cols.forEach(function(cel){
+        					cel.pos.y+= rowNum === 0 ? 1 : -1;
+        				});
+        			});
+        		}
+        	}else{
+        		if (mapLogos[0][0].pos.x < 4){
+        			mapLogos.forEach(function(cols){
+        				cols.forEach(function(cel){
+        					cel.pos.x++;
+        				});
+        			});
+        		}else{
+        			directionLogos = -1;
+        			let rowNum = mapLogos[0][0].pos.y;
+        			mapLogos.forEach(function(cols){
+        				cols.forEach(function(cel){
+        					cel.pos.y+= rowNum === 0 ? 1 : -1;
+        				});
+        			});
+        		}
+        	}
+        }
         checkCollision();
     	setTimeout(processMoveLogos, TIME_ANIMATION);
     }
 
     function processMoveSpaceShip(){
-    	if (directionSpaceShip < 0){
-    		if (positionSpaceShip.x > 0){
-    			positionSpaceShip.x--;
-    		}else{
-    			positionSpaceShip.x++;
-    			directionSpaceShip = 1;
-    		}
-    	}else{
-    		if (positionSpaceShip.x < 11){
-    			positionSpaceShip.x++;
-    		}else{
-    			positionSpaceShip.x--;
-    			directionSpaceShip = -1;
-    		}
-    	}
+        if (freezeMooves){
+            if (positionSpaceShip.x < positionShoot.x){
+                positionSpaceShip.x++;
+            }else if (positionSpaceShip.x < positionShoot.x){
+                positionSpaceShip.x--;
+            }
+        }else{            
+            let delta = Math.floor(Math.random() * 3) - 1;
+            if (delta < 0 && positionSpaceShip.x > 0){
+                    positionSpaceShip.x--;
+            }else if (delta > 0 && positionSpaceShip.x < NB_COLS){
+                positionSpaceShip.x++;
+            }
+            /*if (directionSpaceShip < 0){
+                if (positionSpaceShip.x > 0){
+                    positionSpaceShip.x--;
+                }else{
+                    positionSpaceShip.x++;
+                    directionSpaceShip = 1;
+                }
+            }else{
+                if (positionSpaceShip.x < 11){
+                    positionSpaceShip.x++;
+                }else{
+                    positionSpaceShip.x--;
+                    directionSpaceShip = -1;
+                }
+            }*/
+        }
     	setTimeout(processMoveSpaceShip, TIME_ANIMATION_SPACESHIP);
     }
     
@@ -277,6 +295,34 @@ var DevFestCountDown = DevFestCountDown || function(){
     	if (positionShoot.y >= 0){
     		setTimeout(processMoveShoot, TIME_SHOOT);
     	}
+    }
+
+    function processDestruction(){
+        
+        let destructionCol = -1;
+        let destructionRow = destructionArray.length - 1;
+        if(destructionArray.length === 0){
+            // TODO c'est la fin !  
+            return;
+        }else{
+            let colArray = destructionArray[destructionRow];
+            destructionCol = colArray[0];
+            colArray = colArray.slice(0,1);
+            if (colArray.length === 0){
+                destructionArray = destructionArray.slice(destructionRow , 1);
+            }else{
+                destructionArray[destructionRow] = colArray;
+            }
+        }
+        setTimeout(function(){
+            positionShoot.x =  positionSpaceShip.x;
+            positionShoot.y = positionSpaceShip.y;
+            processMoveShoot();
+        },TIME_DESTRUCTION);
+        setTimeout(function(){
+            freezeMooves = true;
+            positionShoot.x = mapLogos[destructionRow][destructionCol].pos.x;
+        }, TIME_MOVE_SPACESHIP);
     }
 
     function runAnimation(){
@@ -351,6 +397,25 @@ var DevFestCountDown = DevFestCountDown || function(){
 
 		positionSpaceShip.y = canvas.height - SIZE_LOGO_DEST;
 
+        // On prépare la map d'ordres de destruction
+        let nbLogos = 0;
+        for(let rowIndex = 0; rowIndex < mapLogos.length; rowIndex++){
+            if (destructionArray.length === 0 || !destructionArray[rowIndex] ){
+                destructionArray[rowIndex] = [];
+            }
+            nbLogos+= mapLogos[rowIndex].length;
+            do{
+                let randomCol = -1;
+                do{
+
+                    randomCol = Math.floor(Math.random() * mapLogos[rowIndex].length);
+                }while(destructionArray[rowIndex].indexOf(randomCol) != -1);
+                destructionArray[rowIndex].push(randomCol);
+            }while(destructionArray[rowIndex].length < mapLogos[rowIndex].length);
+        }
+        TIME_DESTRUCTION = TIME_COUNT_DOWN / nbLogos;
+        TIME_MOVE_SPACESHIP = TIME_DESTRUCTION - ((NB_COLS - 2) * TIME_ANIMATION_SPACESHIP);
+
 		audioElt = document.getElementById('playlist');
 		loadSprites([
 			{title:'logos', url: 'imgs/logos.svg'},
@@ -360,13 +425,8 @@ var DevFestCountDown = DevFestCountDown || function(){
 			runAnimation();
 			processMoveLogos();
 			processMoveSpaceShip();
-
-			// TODO
-			setTimeout(function(){
-				positionShoot.x =  positionSpaceShip.x;
-				positionShoot.y = positionSpaceShip.y;
-				processMoveShoot();
-			},2000);
+            processDestruction();
+			
 		});
 	}
 
