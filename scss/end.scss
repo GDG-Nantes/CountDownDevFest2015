@@ -1,0 +1,160 @@
+@import "colors";
+
+#opacity{
+  position: absolute;
+  overflow:hidden;
+  background: black;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 5s;
+}
+
+#opacity.black{
+  opacity: 1;
+}
+
+#devfestnantes:after, #devfestnantes:before{
+  content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 500px;
+    background: url(../imgs/logos.svg) no-repeat;
+    background-size: 500px 100%;
+    height: 100%;
+}
+
+#devfestnantes:before{
+  left:0;
+}
+
+#devfestnantes{  
+  position: absolute;
+  background: $bg-color;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 2s;
+  color:white;
+}
+
+#devfestnantes.show{
+  opacity: 1;
+}
+
+#devfestnantes.hide{
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+#devfestnantes .title{
+  position: absolute;
+  top: 40%;
+  left: 0;
+  font-size: 4em;
+  width: 100%;
+  text-align: center;
+}
+
+#devfestnantes img#logo-technos{
+  position: absolute;
+  top: 50%;
+  margin-top: -469px;
+  left: -150px;
+}
+
+#devfestnantes img#tour-bretagne{
+  position: absolute;
+  top: 50%;
+  height: 900px;
+  margin-top: -450px;
+  right: 100px;
+}
+
+.green{
+  color : #93C47D;
+}
+
+#fakemouse{
+  position: absolute;
+  bottom: -200px;
+  left: -200px;
+  background: url(../imgs/fakemouse.png) no-repeat;
+  width: 50px;
+  height: 66px;
+  background-size:50px 66px;
+  transition-property: bottom, left;
+  transition-duration: 2s,2s;
+}
+
+#iovideo{
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition-property: opacity;
+  transition-duration: 0.5s;
+}
+
+#iovideo.show{
+  opacity: 1;
+}
+
+
+/*
+*  MATERIAL DESIGN
+*
+*/
+
+.clicked::after {
+  -webkit-animation: click-wave 0.65s;
+  -moz-animation: click-wave 0.65s;
+  animation: click-wave 0.65s;
+  background: #40e0d0;
+  content: '';
+  display: block;
+  position: relative;
+  z-index: 100;
+}
+/*
+.option-input.radio { border-radius: 50%; }
+.option-input.radio::after { border-radius: 50%; }*/
+
+@-webkit-keyframes click-wave { 
+  0% {
+   width: 40px;
+   height: 40px;
+   opacity: 0.35;
+   position: relative;
+  }
+   100% {
+   width: 200px;
+   height: 200px;
+   margin-left: -80px;
+   margin-top: -80px;
+   opacity: 0.0;
+  }
+}
+
+@keyframes click-wave { 
+  0% {
+   width: 40px;
+   height: 40px;
+   opacity: 0.35;
+   position: relative;
+  }
+ 100% {
+   width: 200px;
+   height: 200px;
+   margin-left: -80px;
+   margin-top: -80px;
+   opacity: 0.0;
+  }
+}

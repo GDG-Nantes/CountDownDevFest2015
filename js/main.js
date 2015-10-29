@@ -10,17 +10,20 @@ var DevFestCountDown = DevFestCountDown || function(){
 		TIME_SHOOT = 200, 
         TIME_DESTRUCTION = 0,
         TIME_MOVE_SPACESHIP = 0,
+        DELTA_TIME_MOVE_DESTRUCTION = 0,
 		MARGIN = 20,
         SHOOT_HEIGHT = 20,
         SHOOT_SPACE = 25,
-        TIME_COUNT_DOWN = 2 * 60 * 1000, 
+        DATE_TIMEOUT = null, //new Date(2015,10,6,8,30,0,0),
+        TIME_COUNT_DOWN = 30 * 60 * 1000, 
         NB_COLS = 12;
 
 	var canvas = null,
 		context = null,
 		images = [],
 		audioElt = null,
-		currentTime = new Date().getTime(),
+        timeStampElt = null,
+		initTime = Date.now(),
         indexPlaylist = 0,
         directionLogos = -1,
         directionSpaceShip = -1,
@@ -33,6 +36,12 @@ var DevFestCountDown = DevFestCountDown || function(){
         	y : -1
         },
         playListSongs = [
+            'Gregory_Porter_-_Liquid_Spirit_(20syl_Remix).mp3',
+            'Panzer_Flower_-_We_Are_Beautiful_(Joe_Mason_Remix).mp3',
+            'The_Noisy_Freaks_&_J.A.C.K._-_We_Are_The_Ones_(Original_Mix).mp3',
+            'The_Chemical_Brothers_-_Go.mp3',
+            'Caravan_Palace_-_Lone_Digger.mp3',
+            'Lemaitre_-_Closer_[Premiere].mp3'
         ],
         positionLogos = {
         	'photos' : {x : 400, y :430},
@@ -132,13 +141,58 @@ var DevFestCountDown = DevFestCountDown || function(){
     }
     function nextSong(){
         try{
-            playSound("assets/songs/"+playListSongs[indexPlaylist]);
+            playSound("audio/"+playListSongs[indexPlaylist]);
             indexPlaylist = (indexPlaylist + 1) % playListSongs.length;
             
         }catch(err){
             console.error(err);
         }
     }
+
+    function endVideo(){
+        window.close();
+    }
+
+    function manageSoundVolume(delta){
+        if (delta < 10 * 1000){
+            audioElt.volume = Math.min(Math.max(0,delta / (10 * 1000)),0.5);
+        }
+    }
+
+     function endCountDown(){
+        document.getElementById('opacity').classList.add('black');
+        setTimeout(afterOpacity, 4000);
+    }
+    function afterOpacity(){
+        document.getElementById('devfestnantes').classList.add('show');
+        setTimeout(mouveMouse, 3000);     
+    }
+    function mouveMouse(){
+        var fakeMouse = document.getElementById('fakemouse');
+        var press = document.getElementById('press');
+        var rectPress = press.getBoundingClientRect();
+        var rectMouse = fakeMouse.getBoundingClientRect();
+        fakeMouse.style.left = (rectPress.left + (rectPress.width / 2))+"px";
+        fakeMouse.style.bottom = (window.innerHeight - rectPress.bottom - rectMouse.height)+"px";
+        setTimeout(mouseClicked, 3000);
+    }
+    function mouseClicked(){
+        var fakeMouse = document.getElementById('fakemouse');
+        fakeMouse.classList.add('clicked');
+        setTimeout(startVideo, 500);
+    }
+    function startVideo(){
+        var videoElt = document.getElementById('iovideo');
+        videoElt.classList.add('show');
+        var devfestElt = document.getElementById('devfestnantes');
+        devfestElt.classList.remove('show');
+        devfestElt.classList.add('hide');
+        videoElt.width = window.innerWidth;
+        videoElt.height = window.innerHeight;
+        videoElt.play();
+    }
+
+
 
     function removeStars() {
 	    for(var l = stars.length-1, i = l; i >= 0; i--) {
@@ -206,7 +260,6 @@ var DevFestCountDown = DevFestCountDown || function(){
             freezeMooves = false;
             positionShoot.x = -1;
             positionShoot.y = -1;
-            processDestruction();
             makeStars(
                 collision.pos.x * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2), 
                 collision.pos.y * (SIZE_LOGO_DEST + MARGIN) + ((SIZE_LOGO_DEST + MARGIN) / 2)
@@ -304,7 +357,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         let destructionCol = -1;
         let destructionRow = destructionArray.length - 1;
         if(destructionArray.length === 0){
-            // TODO c'est la fin !  
+            
             return;
         }else{
             let colArray = destructionArray[destructionRow];
@@ -319,12 +372,11 @@ var DevFestCountDown = DevFestCountDown || function(){
         setTimeout(function(){
             positionShoot.x =  positionSpaceShip.x;
             positionShoot.y = positionSpaceShip.y;
-            processMoveShoot();
-        },TIME_DESTRUCTION);
-        setTimeout(function(){
-            freezeMooves = true;
-            positionShoot.x = mapLogos[destructionRow][destructionCol].pos.x;
-        }, TIME_MOVE_SPACESHIP);
+            processMoveShoot();            
+            setTimeout(processDestruction, TIME_MOVE_SPACESHIP);
+        },DELTA_TIME_MOVE_DESTRUCTION);
+        freezeMooves = true;
+        positionShoot.x = mapLogos[destructionRow][destructionCol].pos.x;
     }
 
     function runAnimation(){
@@ -361,14 +413,14 @@ var DevFestCountDown = DevFestCountDown || function(){
     	if (positionShoot.y >= 0){
     		context.fillStyle = "white";
     		context.fillRect(
-    			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
+    			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + (SIZE_LOGO_DEST / 2) + 2, // X d'origine
     			positionShoot.y, //Y d'origine
     			5, // width
     			SHOOT_HEIGHT // height
     		);
 
     		context.fillRect(
-    			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + 20, // X d'origine
+    			positionShoot.x * (SIZE_LOGO_DEST + MARGIN) + (SIZE_LOGO_DEST / 2) + 2, // X d'origine
     			positionShoot.y + SHOOT_SPACE, //Y d'origine
     			5, // width
     			SHOOT_HEIGHT // height
@@ -383,8 +435,17 @@ var DevFestCountDown = DevFestCountDown || function(){
 	        s.update();
 	    }
 
+        // Timestamp
+        let delta = Math.max((initTime + TIME_COUNT_DOWN) - Date.now(),0);
+        timeStampElt.innerHTML = new Intl.NumberFormat("fr", {minimumIntegerDigits : 13, useGrouping:false})
+            .format(delta);
+        manageSoundVolume(delta);
 
-    	window.requestAnimationFrame(runAnimation);
+        if (delta === 0){
+            endCountDown();
+        }else{
+            window.requestAnimationFrame(runAnimation);
+        }
     }
 
 
@@ -393,6 +454,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 		context = canvas.getContext('2d');
 		let headerRect = document.querySelector('header').getBoundingClientRect();
 		let footerRect = document.querySelector('footer').getBoundingClientRect();
+        timeStampElt = document.getElementById('timestamp');
 
 		canvas.height = footerRect.top - headerRect.bottom;
 		canvas.width = (SIZE_LOGO_DEST + MARGIN) * 12;
@@ -415,9 +477,14 @@ var DevFestCountDown = DevFestCountDown || function(){
                 destructionArray[rowIndex].push(randomCol);
             }while(destructionArray[rowIndex].length < mapLogos[rowIndex].length);
         }
+        if (DATE_TIMEOUT){
+            TIME_COUNT_DOWN = DATE_TIMEOUT.getTime() - initTime;
+        }
         TIME_DESTRUCTION = TIME_COUNT_DOWN / nbLogos;
         TIME_MOVE_SPACESHIP = TIME_DESTRUCTION - ((NB_COLS - 2) * TIME_ANIMATION_SPACESHIP);
+        DELTA_TIME_MOVE_DESTRUCTION = TIME_DESTRUCTION - TIME_MOVE_SPACESHIP;
 
+        
 		audioElt = document.getElementById('playlist');
 		loadSprites([
 			{title:'logos', url: 'imgs/logos.svg'},
@@ -439,6 +506,7 @@ var DevFestCountDown = DevFestCountDown || function(){
 	init();
 
 	return{
-	
+	   nextSong : nextSong,
+       endVideo : endVideo
 	}
 }();

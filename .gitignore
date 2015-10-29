@@ -29,4 +29,9 @@ node_modules
 #css
 css/
 
+#audio
+audio/
+
+
+
 **.fuse_hidden**

@@ -10,7 +10,7 @@
 <body>
     <header>
         <div class="left top">Score</div>
-        <div class="left bottom">775575757</div>
+        <div id="timestamp" class="left bottom">775575757</div>
         <div class="right top">Level</div>
         <div class="right bottom">4</div>
     </header>
@@ -21,9 +21,18 @@
         <div class="left big">DEVFEST 2015 @ NANTES</div>
         <div class="right top">6 NOVEMBRE 2015 - CITE DES CONGRES</div>
         <div class="right bottom">HTTPS://DEVFEST.GDGNANTES.COM</div>     
-        <audio id="playlist" src="" style="display:none;" onended="nextSong();"></audio>
+        <audio id="playlist" src="" style="display:none;" onended="DevFestCountDown.nextSong();"></audio>
     </footer>
     <script src="js/main.js"></script>
+    <div id="opacity">
+        <div id="devfestnantes">            
+            <!--<img src="assets/images/logo.png" id="logo-technos"> -->
+            <div class="title">DevFest Nantes<br><br>2015<br><br><span id="press" class="green">&lt;press start&gt;</span></div>
+            <div id="fakemouse"></div>
+            <!--<img src="assets/images/tshirt_final_xl.png" id="tour-bretagne"> -->
+        </div>
+        <video id="iovideo" src="video/io15-intro.mp4" onended="DevFestCountDown.endVideo();"></video>
+    </div>
 </body>
 
 </html>
