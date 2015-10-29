@@ -27,6 +27,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         stars = [],
         freezeMooves = false,
         collision = null,
+        nbStepsSpaceShip = 0,
         positionShoot =  {
         	x : -1,
         	y : -1
@@ -259,17 +260,19 @@ var DevFestCountDown = DevFestCountDown || function(){
         if (freezeMooves){
             if (positionSpaceShip.x < positionShoot.x){
                 positionSpaceShip.x++;
-            }else if (positionSpaceShip.x < positionShoot.x){
+            }else if (positionSpaceShip.x > positionShoot.x){
                 positionSpaceShip.x--;
             }
         }else{            
-            let delta = Math.floor(Math.random() * 3) - 1;
-            if (delta < 0 && positionSpaceShip.x > 0){
-                    positionSpaceShip.x--;
-            }else if (delta > 0 && positionSpaceShip.x < NB_COLS){
-                positionSpaceShip.x++;
-            }
-            /*if (directionSpaceShip < 0){
+            nbStepsSpaceShip++;
+            if (nbStepsSpaceShip % 10 === 0){                
+                let delta = Math.floor(Math.random() * 3) - 1;
+                if (delta < 0 && positionSpaceShip.x > 0){
+                        positionSpaceShip.x--;
+                }else if (delta > 0 && positionSpaceShip.x < NB_COLS){
+                    positionSpaceShip.x++;
+                }
+            }else if (directionSpaceShip < 0){
                 if (positionSpaceShip.x > 0){
                     positionSpaceShip.x--;
                 }else{
@@ -283,14 +286,14 @@ var DevFestCountDown = DevFestCountDown || function(){
                     positionSpaceShip.x--;
                     directionSpaceShip = -1;
                 }
-            }*/
+            }
         }
     	setTimeout(processMoveSpaceShip, TIME_ANIMATION_SPACESHIP);
     }
     
 
     function processMoveShoot(){
-    	positionShoot.y-= (SIZE_LOGO_DEST + MARGIN);
+    	positionShoot.y-= (SIZE_LOGO_DEST);
     	checkCollision();
     	if (positionShoot.y >= 0){
     		setTimeout(processMoveShoot, TIME_SHOOT);
@@ -298,7 +301,6 @@ var DevFestCountDown = DevFestCountDown || function(){
     }
 
     function processDestruction(){
-        
         let destructionCol = -1;
         let destructionRow = destructionArray.length - 1;
         if(destructionArray.length === 0){
@@ -307,9 +309,9 @@ var DevFestCountDown = DevFestCountDown || function(){
         }else{
             let colArray = destructionArray[destructionRow];
             destructionCol = colArray[0];
-            colArray = colArray.slice(0,1);
+            colArray.splice(0,1);
             if (colArray.length === 0){
-                destructionArray = destructionArray.slice(destructionRow , 1);
+                destructionArray.splice(destructionRow , 1);
             }else{
                 destructionArray[destructionRow] = colArray;
             }
