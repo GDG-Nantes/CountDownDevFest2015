@@ -7,16 +7,20 @@ var DevFestCountDown = DevFestCountDown || function(){
 		SIZE_LOGO_DEST = 100, 
 		TIME_ANIMATION = 5000,
 		TIME_ANIMATION_SPACESHIP = 500,
-		TIME_SHOOT = 200, 
-        TIME_DESTRUCTION = 0,
-        TIME_MOVE_SPACESHIP = 0,
-        DELTA_TIME_MOVE_DESTRUCTION = 0,
+		TIME_SHOOT = 100,         
 		MARGIN = 20,
         SHOOT_HEIGHT = 20,
         SHOOT_SPACE = 25,
         DATE_TIMEOUT = null, //new Date(2015,10,6,8,30,0,0),
-        TIME_COUNT_DOWN = 30 * 60 * 1000, 
-        NB_COLS = 12;
+        TIME_COUNT_DOWN = 30 * 60 * 1000,         
+        NB_COLS = 12;        
+
+    // Constantes calculées
+    var TIME_DESTRUCTION = 0,
+        TIME_MOVE_SPACESHIP = 0,
+        DELTA_TIME_MOVE_DESTRUCTION = 0,
+        TIME_MAX_OF_SHOOT = 0,
+        NB_ROW = 0;
 
 	var canvas = null,
 		context = null,
@@ -30,6 +34,9 @@ var DevFestCountDown = DevFestCountDown || function(){
         stars = [],
         freezeMooves = false,
         collision = null,
+        mapShoot = {},
+        canMoove = false,
+        nbLogos = 0,
         nbStepsSpaceShip = 0,
         positionShoot =  {
         	x : -1,
@@ -353,6 +360,13 @@ var DevFestCountDown = DevFestCountDown || function(){
     	}
     }
 
+    function startShoot(){
+        positionShoot.x =  positionSpaceShip.x;
+        positionShoot.y = positionSpaceShip.y;
+        processMoveShoot();         
+        setTimeout(processDestruction, TIME_MOVE_SPACESHIP);
+    }
+
     function processDestruction(){
         let destructionCol = -1;
         let destructionRow = destructionArray.length - 1;
@@ -369,12 +383,12 @@ var DevFestCountDown = DevFestCountDown || function(){
                 destructionArray[destructionRow] = colArray;
             }
         }
-        setTimeout(function(){
+        /*setTimeout(function(){
             positionShoot.x =  positionSpaceShip.x;
             positionShoot.y = positionSpaceShip.y;
             processMoveShoot();            
-            setTimeout(processDestruction, TIME_MOVE_SPACESHIP);
-        },DELTA_TIME_MOVE_DESTRUCTION);
+            //setTimeout(processDestruction, TIME_MOVE_SPACESHIP);
+        },DELTA_TIME_MOVE_DESTRUCTION);*/
         freezeMooves = true;
         positionShoot.x = mapLogos[destructionRow][destructionCol].pos.x;
     }
@@ -441,6 +455,19 @@ var DevFestCountDown = DevFestCountDown || function(){
             .format(delta);
         manageSoundVolume(delta);
 
+        // Gestion des tirs        
+        
+        let indexShoot = Math.floor((delta - TIME_MAX_OF_SHOOT) / TIME_DESTRUCTION) + 1;
+        if (!mapShoot[indexShoot]){
+            mapShoot[indexShoot] = true;
+            if (indexShoot < nbLogos){                
+                startShoot();
+                canMoove = true;
+            }
+        }
+
+
+
         if (delta === 0){
             endCountDown();
         }else{
@@ -458,11 +485,12 @@ var DevFestCountDown = DevFestCountDown || function(){
 
 		canvas.height = footerRect.top - headerRect.bottom;
 		canvas.width = (SIZE_LOGO_DEST + MARGIN) * 12;
+        NB_ROW = canvas.height / (SIZE_LOGO_DEST + MARGIN);
 
 		positionSpaceShip.y = canvas.height - SIZE_LOGO_DEST;
 
         // On prépare la map d'ordres de destruction
-        let nbLogos = 0;
+        nbLogos = 0;
         for(let rowIndex = 0; rowIndex < mapLogos.length; rowIndex++){
             if (destructionArray.length === 0 || !destructionArray[rowIndex] ){
                 destructionArray[rowIndex] = [];
@@ -483,7 +511,11 @@ var DevFestCountDown = DevFestCountDown || function(){
         TIME_DESTRUCTION = TIME_COUNT_DOWN / nbLogos;
         TIME_MOVE_SPACESHIP = TIME_DESTRUCTION - ((NB_COLS - 2) * TIME_ANIMATION_SPACESHIP);
         DELTA_TIME_MOVE_DESTRUCTION = TIME_DESTRUCTION - TIME_MOVE_SPACESHIP;
+        TIME_MAX_OF_SHOOT = (NB_ROW - 1) * TIME_SHOOT + 300;
 
+        console.info("TimeDestruction : %d", TIME_DESTRUCTION);
+        console.info("TimeMoveSpaceShip : %d", TIME_MOVE_SPACESHIP);
+        console.info("TimeMaxOfShoot : %d", TIME_MAX_OF_SHOOT);
         
 		audioElt = document.getElementById('playlist');
 		loadSprites([
