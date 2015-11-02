@@ -12,7 +12,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         SHOOT_HEIGHT = 20,
         SHOOT_SPACE = 25,
         DATE_TIMEOUT = null, //new Date(2015,10,6,8,30,0,0),
-        TIME_COUNT_DOWN = 30 * 60 * 1000,         
+        TIME_COUNT_DOWN = 0.2 * 60 * 1000,         
         NB_COLS = 12;        
 
     // Constantes calculées

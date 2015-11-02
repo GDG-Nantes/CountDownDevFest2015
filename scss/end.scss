@@ -16,20 +16,18 @@
   opacity: 1;
 }
 
-#devfestnantes:after, #devfestnantes:before{
+#devfestnantes:before{
   content: '';
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 500px;
-    background: url(../imgs/logos.svg) no-repeat;
-    background-size: 500px 100%;
+    top: 140px;
+    left: 450px;
+    width: 900px;
+    //margin-left : -450px;
+    background: url(../imgs/fond_logos.png) no-repeat;
+    background-size: 900px;
     height: 100%;
 }
 
-#devfestnantes:before{
-  left:0;
-}
 
 #devfestnantes{  
   position: absolute;
