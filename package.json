@@ -9,5 +9,5 @@
     "gulp": "^3.8.11",
     "gulp-sass": "^2.0.4",
     "gulp-sourcemaps": "^1.5.2"
-    }
+  }
 }

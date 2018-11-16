@@ -27,10 +27,10 @@ build/Release
 node_modules
 
 #css
-css/
+#css/
 
 #audio
-audio/
+#audio/
 
 #Video
 video/DevFest2015v2.mp4

@@ -12,7 +12,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         SHOOT_HEIGHT = 20,
         SHOOT_SPACE = 25,
         DATE_TIMEOUT = null, //new Date(2015,10,6,8,30,0,0),
-        TIME_COUNT_DOWN = 0.2 * 60 * 1000,         
+        TIME_COUNT_DOWN = 2 * 60 * 1000 + 30 * 1000,         
         NB_COLS = 12;        
 
     // Constantes calculées
@@ -43,12 +43,7 @@ var DevFestCountDown = DevFestCountDown || function(){
         	y : -1
         },
         playListSongs = [
-            'Gregory_Porter_-_Liquid_Spirit_(20syl_Remix).mp3',
-            'Panzer_Flower_-_We_Are_Beautiful_(Joe_Mason_Remix).mp3',
-            'The_Noisy_Freaks_&_J.A.C.K._-_We_Are_The_Ones_(Original_Mix).mp3',
-            'The_Chemical_Brothers_-_Go.mp3',
-            'Caravan_Palace_-_Lone_Digger.mp3',
-            'Lemaitre_-_Closer_[Premiere].mp3'
+            'The_Spin_Wires_-_Blackout_Romeo.mp3'
         ],
         positionLogos = {
         	'photos' : {x : 400, y :430},
@@ -532,7 +527,13 @@ var DevFestCountDown = DevFestCountDown || function(){
 	}
 
 	function init(){
-		window.addEventListener('load', pageLoad);
+		window.addEventListener('load', ()=>{
+            
+            document.getElementById('startClickMe').addEventListener('click', ()=>{
+                document.getElementById('toHideButton').style.display = 'none';
+                pageLoad();
+            });
+        });
 	}
 
 	init();
